@@ -15,6 +15,8 @@ const saltRounds = 10;
 router.post('/signup', async(req, res, next) => {
   const { email, password, name } = req.body;
 
+  console.log('req body: ', email, password, name);
+
   // Check if email or password or name are provided as empty string 
   if (email === '' || password === '' || name === '') {
     res.status(400).json({ message: "Provide email, password and name" });
@@ -77,7 +79,7 @@ router.post('/signup', async(req, res, next) => {
     // await transporter.sendMail(msg);
   
     // const { email: createdEmail, name: createdName, _id: createdId } = createdUser;
-    // const user = { email: createdEmail, name: createdName, _id: createdId,  };
+    // const user = { email: createdEmail, name: createdName, _id: createdId,};
   
     res.status(201).json({ createdUser });
   } catch (err) {
