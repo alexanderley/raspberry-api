@@ -2,8 +2,8 @@ const express = require("express");
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const User = require("../models/User.model");
-const nodemailer = require("nodemailer");
-const frontend_URL = require("../frontendKey");
+// const nodemailer = require("nodemailer");
+// const frontend_URL = require("../frontendKey");
 
 const { isAuthenticated } = require('./../middleware/jwt.middleware.js');
 
