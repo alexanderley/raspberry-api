@@ -1,5 +1,7 @@
 require("dotenv/config");
 require("./db");
+// important to import the azureConfig!!
+require("./azure/azure.config");
 const express = require("express");
 
 const { isAuthenticated } = require("./middleware/jwt.middleware");
