@@ -1,30 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const Video = require("../models/Video.model");
-const { blobServiceClient, containerClient } = require("../azure/azure.config");
-const stream = require("stream");
 
-// Helper function to extract metadata from headers
-function extractMetadata(headers) {
-  const contentType = headers['content-type'] || 'application/octet-stream';
-  const fileType = contentType.split('/')[1] || 'bin';
-  const contentDisposition = headers['content-disposition'] || '';
-  const caption = headers['x-image-caption'] || 'No caption provided';
-  
-  const matches = /filename="([^"]+)"/i.exec(contentDisposition);
-  const fileName = matches?.[1] || `file-${Date.now()}.${fileType}`;
-  
-  return { fileName, caption, fileType, contentType };
-}
+// configuration for azure blob
+const { containerClient } = require("../azure/azure.config");
 
-// Upload to Azure Blob Storage
-async function uploadToBlob(blobName, readableStream, contentType) {
-  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-  await blockBlobClient.uploadStream(readableStream, undefined, undefined, {
-    blobHTTPHeaders: { blobContentType: contentType }
-  });
-  return blockBlobClient.url;
-}
+// Function with upload logic
+const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
+
 
 // upload video to blob
 router.post("/upload", async (req, res) => {

@@ -1,53 +1,30 @@
+const {containerClient} = require("../azure/azure.config");
 
-// #TODO -> Check if controller work these need to be imported to the blob.routes file
 
-const { MongoClient } = require('mongodb');
-const blobStorage = require('./blob-storage');
-
-// MongoDB setup
-const mongoClient = new MongoClient(process.env.MONGODB_URI);
-
-async function storeMetadata(name, caption, fileType, imageUrl) {
-  try {
-    await mongoClient.connect();
-    const collection = mongoClient.db("tutorial").collection('metadata');
-    await collection.insertOne({ 
-      name, 
-      caption, 
-      fileType, 
-      imageUrl, 
-      createdAt: new Date() 
-    });
-  } finally {
-    await mongoClient.close();
-  }
+function extractMetadata(headers) {
+  const contentType = headers['content-type'] || 'application/octet-stream';
+  const fileType = contentType.split('/')[1] || 'bin';
+  const contentDisposition = headers['content-disposition'] || '';
+  const caption = headers['x-image-caption'] || 'No caption provided';
+  
+  const matches = /filename="([^"]+)"/i.exec(contentDisposition);
+  const fileName = matches?.[1] || `file-${Date.now()}.${fileType}`;
+  
+  return { fileName, caption, fileType, contentType };
 }
 
-async function handleImageUpload(req, res) {
-  try {
-    // Extract metadata
-    const { fileName, caption, fileType } = blobStorage.extractMetadata(req.headers);
-    
-    // Upload to Azure
-    const imageUrl = await blobStorage.uploadStream(fileName, req);
-    
-    // Store metadata
-    await storeMetadata(fileName, caption, fileType, imageUrl);
-    
-    res.status(201).json({ 
-      success: true,
-      fileName,
-      imageUrl
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ 
-      success: false,
-      error: error.message 
-    });
-  }
+// Upload to Azure Blob Storage
+async function uploadToBlob(blobName, readableStream, contentType) {
+  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+  await blockBlobClient.uploadStream(readableStream, undefined, undefined, {
+    blobHTTPHeaders: { blobContentType: contentType }
+  });
+  return blockBlobClient.url;
 }
+
+
 
 module.exports = {
-  handleImageUpload
+  extractMetadata,
+  uploadToBlob
 };

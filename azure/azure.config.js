@@ -18,7 +18,6 @@ if (!accountName || !sasToken || !containerName) {
 async function testConnection(){
   try{
     const blobProps = await blobServiceClient.getProperties();
-    // const containerClient = blobServiceClient.getContainerClient(containerName);
     const containerExists = await containerClient.exists();
 
     // console.log(`blobProps / Account SKU: ${blobProps}`);
@@ -36,6 +35,4 @@ module.exports = {
     testConnection,
     blobServiceClient,
     containerClient
-    // uploadStream,
-    // extractMetadata
   };
