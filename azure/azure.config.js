@@ -8,7 +8,8 @@ const containerName = process.env.AZURE_CONTAINER_NAME;
 
 // Establishes a connection with Azure Blob Storage
 const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
-// const containerClient = blobServiceClient.getContainerClient(containerName);
+
+const containerClient = blobServiceClient.getContainerClient(containerName);
 
 if (!accountName || !sasToken || !containerName) {
   throw new Error("Missing Azure Storage environment variables!");
@@ -17,25 +18,24 @@ if (!accountName || !sasToken || !containerName) {
 async function testConnection(){
   try{
     const blobProps = await blobServiceClient.getProperties();
-    const containerClient = blobServiceClient.getContainerClient(containerName);
+    // const containerClient = blobServiceClient.getContainerClient(containerName);
     const containerExists = await containerClient.exists();
 
     // console.log(`blobProps / Account SKU: ${blobProps}`);
     // console.log('Containerclient: ', containerClient);
-    console.log('containerExist??????????', containerExists);
+    console.log('containerExist: ', containerExists);
     return true;
   }catch(err){
     console.log('error: ',err.message)
   }
 }
-
 testConnection();
-
-console.log('Azure Configuration is running!!!!!!!!!!!!!!!!!!');
 
 
 module.exports = {
     testConnection,
+    blobServiceClient,
+    containerClient
     // uploadStream,
     // extractMetadata
   };

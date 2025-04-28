@@ -11,11 +11,12 @@ const app = express();
 require("./config")(app);
 
 
-
-
 // 👇 Start handling routes here
 const allRoutes = require("./routes");
 app.use("/api", allRoutes);
+
+const blobRouter = require("./routes/blob.routes");
+app.use("/api", blobRouter);
 
 const projectRouter = require("./routes/project.routes");
 app.use("/api", isAuthenticated, projectRouter);
@@ -26,8 +27,7 @@ app.use("/api", taskRouter);
 const authRouter = require("./routes/auth.routes");
 app.use("/auth", authRouter);
 
-const blobRouter = require("./routes/blob.routes");
-app.use("/api", blobRouter);
+
 
 require("./error-handling")(app);
 
