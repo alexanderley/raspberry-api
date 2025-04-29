@@ -9,6 +9,12 @@ const { containerClient } = require("../azure/azure.config");
 const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
 
 
+// curl -X POST http://localhost:5005/api/upload \
+//   -H "Content-Type: video/mov" \
+//   -H "Content-Disposition: attachment; filename=\"ley2.mov\"" \
+//   -H "x-image-caption: My test video" \
+//   --data-binary @./ley2.mov
+
 // upload video to blob
 router.post("/upload", async (req, res) => {
   try {
