@@ -8,12 +8,10 @@ const { containerClient } = require("../azure/azure.config");
 // Function with upload logic
 const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
 
-const ffmpegPath = require('ffmpeg-static');
-const ffmpeg = require('fluent-ffmpeg');
 
-console.log('ffmpeg path: ', 
+const convertToHLS = require('../controller/ffmpeg.controller');
 
-)
+console.log('converHLS: ', convertToHLS);
 
 // curl -X POST http://localhost:5005/api/upload \
 //   -H "Content-Type: video/mov" \
@@ -24,8 +22,19 @@ console.log('ffmpeg path: ',
 // upload video to blob
 router.post("/upload", async (req, res) => {
   try {
+    console.log('req body: ', req.body);
     // 1. Extract metadata from headers
     const { fileName, caption, fileType, contentType } = extractMetadata(req.headers);
+
+    // Convert to HLS
+
+    // Store the incoming data locally
+    const tempFilePath = path.join(__dirname, 'temp', fileName);
+
+    // Save the incoming file to the server (assuming the file is in req.body)
+    const writeStream = fs.createWriteStream(tempFilePath);
+    req.pipe(writeStream);
+
 
     // 2. Upload directly to Azure Blob Storage
     const videoUrl = await uploadToBlob(fileName, req, contentType);
