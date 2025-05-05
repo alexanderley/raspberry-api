@@ -8,6 +8,12 @@ const { containerClient } = require("../azure/azure.config");
 // Function with upload logic
 const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
 
+const ffmpegStatic = require('ffmpeg-static');
+const ffmpeg = require('fluent-ffmpeg');
+
+console.log('ffmpeg path: ', 
+
+)
 
 // curl -X POST http://localhost:5005/api/upload \
 //   -H "Content-Type: video/mov" \
