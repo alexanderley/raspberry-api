@@ -8,7 +8,7 @@ const { containerClient } = require("../azure/azure.config");
 // Function with upload logic
 const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
 
-const ffmpegStatic = require('ffmpeg-static');
+const ffmpegPath = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
 
 console.log('ffmpeg path: ', 
