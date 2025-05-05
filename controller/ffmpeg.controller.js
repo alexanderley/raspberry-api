@@ -1,35 +1,38 @@
-const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = require('ffmpeg-static');
 const fs = require('fs');
+const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
-const { uploadFileToBlob } = require('./azureUploadUtils'); // Your utility for uploading files
 
-ffmpeg.setFfmpegPath(ffmpegPath);
-
-// Converts a video file to HLS and returns the directory path with .m3u8 and .ts files
-const convertToHLS = (inputPath, outputDir) => {
+const convertToHLS = async (filename, filepath) => {
   return new Promise((resolve, reject) => {
-    fs.mkdirSync(outputDir, { recursive: true });
+    const outputDir = path.join(__dirname, 'hls', filename);
+    const playlistPath = path.join(outputDir, 'playlist.m3u8');
 
-    ffmpeg(inputPath)
+    // Validate input file
+    if (!fs.existsSync(filepath)) {
+      return reject(new Error(`Input file does not exist: ${filepath}`));
+    }
+    // Create output directory if it doesn't exist
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    ffmpeg(filepath)
       .outputOptions([
-        "-preset veryfast",
-        "-g 48",
-        "-sc_threshold 0",
-        "-map 0:0",
-        "-map 0:1",
-        "-f hls",
-        "-hls_time 10",
-        "-hls_list_size 0",
-        "-hls_segment_filename", path.join(outputDir, 'segment_%03d.ts')
+        '-c copy',            // Correct: copy both video and audio streams
+        '-start_number 0',
+        '-hls_time 10',
+        '-hls_list_size 0',
+        '-f hls'
       ])
-      .output(path.join(outputDir, 'index.m3u8'))
-      .on('end', () => resolve(outputDir))
-      .on('error', reject)
+      .output(playlistPath)
+      .on('error', (err) => {
+        reject(new Error(`HLS conversion failed: ${err.message}`));
+      })
+      .on('end', () => {
+        resolve({ playlistPath, outputDir });
+      })
       .run();
   });
 };
 
-module.exports = {
-   convertToHLS
-  };
+module.exports = convertToHLS;
