@@ -33,24 +33,17 @@ router.post("/upload", async (req, res) => {
     // Store the incoming data locally
     const tempDir = path.join(__dirname, 'temp');
     const tempFilePath = path.join(tempDir, fileName); 
-    console.log('xxxx tempfilePath:', tempFilePath);
-    console.log('fileName:', fileName);
    
-
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
-      // console.log('tempDir:', tempDir);
     }
 
     // Save the incoming file to the server (assuming the file is in req.body)
     const writeStream = fs.createWriteStream(tempFilePath);
     req.pipe(writeStream);
 
-    // console.log('tempfilePath', tempFilePath);
-    // console.log('writeStream', writeStream);
-
     }catch(err){
-      // console.log('error: ', err)
+      console.log('error: ', err)
     }
 
     debugger
