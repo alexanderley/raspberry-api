@@ -2,7 +2,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('ffmpeg-static');
 const fs = require('fs');
 const path = require('path');
-const { uploadFileToBlob } = require('./azureUploadUtils'); // Your utility for uploading files
+// const { uploadFileToBlob } = require('./azureUploadUtils'); // Your utility for uploading files
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 

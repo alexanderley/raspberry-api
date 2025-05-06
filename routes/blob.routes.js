@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Video = require("../models/Video.model");
+const path = require("path");
+const fs = require("fs");
 
 // configuration for azure blob
 const { containerClient } = require("../azure/azure.config");
@@ -22,19 +24,37 @@ console.log('converHLS: ', convertToHLS);
 // upload video to blob
 router.post("/upload", async (req, res) => {
   try {
-    console.log('req body: ', req.body);
+    // console.log('req body: ', req.body);
     // 1. Extract metadata from headers
     const { fileName, caption, fileType, contentType } = extractMetadata(req.headers);
 
     // Convert to HLS
-
+    try{
     // Store the incoming data locally
-    const tempFilePath = path.join(__dirname, 'temp', fileName);
+    const tempDir = path.join(__dirname, 'temp');
+    const tempFilePath = path.join(tempDir, fileName); 
+    console.log('xxxx tempfilePath:', tempFilePath);
+    console.log('fileName:', fileName);
+   
+
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+      // console.log('tempDir:', tempDir);
+    }
 
     // Save the incoming file to the server (assuming the file is in req.body)
     const writeStream = fs.createWriteStream(tempFilePath);
     req.pipe(writeStream);
 
+    // console.log('tempfilePath', tempFilePath);
+    // console.log('writeStream', writeStream);
+
+    }catch(err){
+      // console.log('error: ', err)
+    }
+
+    debugger
+    return
 
     // 2. Upload directly to Azure Blob Storage
     const videoUrl = await uploadToBlob(fileName, req, contentType);
