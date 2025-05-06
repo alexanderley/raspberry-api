@@ -42,6 +42,12 @@ router.post("/upload", async (req, res) => {
     const writeStream = fs.createWriteStream(tempFilePath);
     req.pipe(writeStream);
 
+    // Creates a export directory(delete later!!!)
+    const exportDir = path.join(__dirname, 'export');
+    if (!fs.existsSync(exportDir)) {
+      fs.mkdirSync(exportDir, { recursive: true });
+    }
+
     }catch(err){
       console.log('error: ', err)
     }
