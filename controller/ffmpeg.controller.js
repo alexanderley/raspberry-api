@@ -1,32 +1,50 @@
+// This file contains logic where the video is converted from mp4 and mov to streamable formats like hls. 
+
+// IMPORTANT. Make shure that ffmpeg is installed on machine. Locally and later on the server itself!
+
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('ffmpeg-static');
 const fs = require('fs');
 const path = require('path');
-// const { uploadFileToBlob } = require('./azureUploadUtils'); // Your utility for uploading files
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-// Converts a video file to HLS and returns the directory path with .m3u8 and .ts files
 const convertToHLS = (inputPath, outputDir) => {
   return new Promise((resolve, reject) => {
     fs.mkdirSync(outputDir, { recursive: true });
 
-    ffmpeg(inputPath)
-      .outputOptions([
+    // Check if the input file has both video and audio streams
+    ffmpeg.ffprobe(inputPath, (err, metadata) => {
+      if (err) {
+        return reject(err);
+      }
+
+      // Check the number of streams in the input file
+      const hasAudio = metadata.streams.some(stream => stream.codec_type === 'audio');
+      
+      const outputOptions = [
         "-preset veryfast",
         "-g 48",
         "-sc_threshold 0",
-        "-map 0:0",
-        "-map 0:1",
+        "-map 0:0",  // Always map the first video stream
         "-f hls",
         "-hls_time 10",
         "-hls_list_size 0",
         "-hls_segment_filename", path.join(outputDir, 'segment_%03d.ts')
-      ])
-      .output(path.join(outputDir, 'index.m3u8'))
-      .on('end', () => resolve(outputDir))
-      .on('error', reject)
-      .run();
+      ];
+
+      // If audio stream exists, map the audio stream as well
+      if (hasAudio) {
+        outputOptions.push("-map 0:1");
+      }
+
+      ffmpeg(inputPath)
+        .outputOptions(outputOptions)
+        .output(path.join(outputDir, 'index.m3u8'))
+        .on('end', () => resolve(outputDir))
+        .on('error', reject)
+        .run();
+    });
   });
 };
 

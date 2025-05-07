@@ -4,32 +4,28 @@ const Video = require("../models/Video.model");
 const path = require("path");
 const fs = require("fs");
 
-// configuration for azure blob
-const { containerClient } = require("../azure/azure.config");
-
-// Function with upload logic
-const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
-
-
-const convertToHLS = require('../controller/ffmpeg.controller');
-
-console.log('converHLS: ', convertToHLS);
-
 // curl -X POST http://localhost:5005/api/upload \
 //   -H "Content-Type: video/mov" \
 //   -H "Content-Disposition: attachment; filename=\"ley2.mov\"" \
 //   -H "x-image-caption: My test video" \
 //   --data-binary @./ley2.mov
 
+// configuration for azure blob
+const { containerClient } = require("../azure/azure.config");
+
+// Function with upload logic
+const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
+
+const { convertToHLS } =  require("../controller/ffmpeg.controller");
+
+
 // upload video to blob
 router.post("/upload", async (req, res) => {
   try {
-    // console.log('req body: ', req.body);
     // 1. Extract metadata from headers
     const { fileName, caption, fileType, contentType } = extractMetadata(req.headers);
 
-    // Convert to HLS
-    try{
+    try {
     // Store the incoming data locally
     const tempDir = path.join(__dirname, 'temp');
     const tempFilePath = path.join(tempDir, fileName); 
@@ -40,7 +36,13 @@ router.post("/upload", async (req, res) => {
 
     // Save the incoming file to the server (assuming the file is in req.body)
     const writeStream = fs.createWriteStream(tempFilePath);
-    req.pipe(writeStream);
+
+      // Wait for the file to finish uploading
+      await new Promise((resolve, reject) => {
+        req.pipe(writeStream)
+          .on('finish', resolve)
+          .on('error', reject);   
+      });
 
     // Creates a export directory(delete later!!!)
     const exportDir = path.join(__dirname, 'export');
@@ -48,7 +50,12 @@ router.post("/upload", async (req, res) => {
       fs.mkdirSync(exportDir, { recursive: true });
     }
 
-    }catch(err){
+    console.log('tempFilePath: ', tempFilePath);
+    console.log('exportDir: ', exportDir);
+
+    await convertToHLS(tempFilePath, exportDir);
+
+    } catch(err){
       console.log('error: ', err)
     }
 
