@@ -9,7 +9,7 @@ const path = require('path');
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-const convertToHLS = (inputPath, outputDir) => {
+const convertToHLS = (inputPath, outputDir, fileName) => {
   return new Promise((resolve, reject) => {
     fs.mkdirSync(outputDir, { recursive: true });
 
@@ -22,6 +22,10 @@ const convertToHLS = (inputPath, outputDir) => {
       // Check the number of streams in the input file
       const hasAudio = metadata.streams.some(stream => stream.codec_type === 'audio');
       
+      // formated sgement
+      const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+      console.log('formated name: ', fileNameWithoutExt);
+
       const outputOptions = [
         "-preset veryfast",
         "-g 48",
@@ -30,7 +34,7 @@ const convertToHLS = (inputPath, outputDir) => {
         "-f hls",
         "-hls_time 10",
         "-hls_list_size 0",
-        "-hls_segment_filename", path.join(outputDir, 'segment_%03d.ts')
+        "-hls_segment_filename", path.join(outputDir, `${fileNameWithoutExt}_segment_%03d.ts`)
       ];
 
       // If audio stream exists, map the audio stream as well
@@ -40,7 +44,7 @@ const convertToHLS = (inputPath, outputDir) => {
 
       ffmpeg(inputPath)
         .outputOptions(outputOptions)
-        .output(path.join(outputDir, 'index.m3u8'))
+        .output(path.join(outputDir, `${fileNameWithoutExt}_index.m3u8`))
         .on('end', () => resolve(outputDir))
         .on('error', reject)
         .run();

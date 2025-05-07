@@ -50,10 +50,11 @@ router.post("/upload", async (req, res) => {
       fs.mkdirSync(exportDir, { recursive: true });
     }
 
-    console.log('tempFilePath: ', tempFilePath);
-    console.log('exportDir: ', exportDir);
+    // console.log('fileName: ', fileName);
+    // console.log('tempFilePath: ', tempFilePath);
+    // console.log('exportDir: ', exportDir);
 
-    await convertToHLS(tempFilePath, exportDir);
+    await convertToHLS(tempFilePath, exportDir, fileName);
 
     } catch(err){
       console.log('error: ', err)
