@@ -15,7 +15,6 @@ const { containerClient } = require("../azure/azure.config");
 
 // Function with upload logic
 const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
-
 const { convertToHLS } =  require("../controller/ffmpeg.controller");
 
 
@@ -26,17 +25,18 @@ router.post("/upload", async (req, res) => {
     const { fileName, caption, fileType, contentType } = extractMetadata(req.headers);
 
     try {
-    // Store the incoming data locally
-    const tempDir = path.join(__dirname, 'temp');
-    const tempFilePath = path.join(tempDir, fileName); 
-   
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
+      // Store the incoming data locally
+      const tempDir = path.join(__dirname, 'temp');
+      const tempFilePath = path.join(tempDir, fileName); 
 
-    // Save the incoming file to the server (assuming the file is in req.body)
-    const writeStream = fs.createWriteStream(tempFilePath);
+      console.log('tempFilePath: ', tempFilePath);
+    
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
 
+      // Save the incoming file to the server (assuming the file is in req.body)
+      const writeStream = fs.createWriteStream(tempFilePath);
       // Wait for the file to finish uploading
       await new Promise((resolve, reject) => {
         req.pipe(writeStream)
@@ -44,23 +44,21 @@ router.post("/upload", async (req, res) => {
           .on('error', reject);   
       });
 
-    // Creates a export directory(delete later!!!)
-    const exportDir = path.join(__dirname, 'export');
-    if (!fs.existsSync(exportDir)) {
-      fs.mkdirSync(exportDir, { recursive: true });
-    }
+      // Creates a export directory(delete later!!!)
+      const exportDir = path.join(__dirname, 'export');
+      if (!fs.existsSync(exportDir)) {
+        fs.mkdirSync(exportDir, { recursive: true });
+      }
 
-    // console.log('fileName: ', fileName);
-    // console.log('tempFilePath: ', tempFilePath);
-    // console.log('exportDir: ', exportDir);
-
-    await convertToHLS(tempFilePath, exportDir, fileName);
+      const hlsData = await convertToHLS(tempFilePath, exportDir, fileName);
+      console.log('Playlist:', hlsData.playlistPath);
+      console.log('Segments:', hlsData.segments);
 
     } catch(err){
       console.log('error: ', err)
     }
 
-    debugger
+    
     return
 
     // 2. Upload directly to Azure Blob Storage
