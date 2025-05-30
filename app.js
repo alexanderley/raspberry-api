@@ -12,8 +12,12 @@ require("./config")(app);
 
 
 // 👇 Start handling routes here
+
 const allRoutes = require("./routes");
 app.use("/api", allRoutes);
+
+const infinitRouter = require("./routes/infinite.routes");
+app.use("/api", infinitRouter);
 
 const blobRouter = require("./routes/blob.routes");
 app.use("/api", blobRouter);
@@ -23,6 +27,8 @@ app.use("/api", isAuthenticated, projectRouter);
 
 const taskRouter = require("./routes/task.routes");
 app.use("/api", taskRouter);
+
+
 
 const authRouter = require("./routes/auth.routes");
 app.use("/auth", authRouter);
