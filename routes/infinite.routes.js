@@ -3,39 +3,43 @@ const router = express.Router();
 const Card = require('../models/Card.model');
 
 
-// router.get("/getCards", async (req, res) => {
-//   const page = parseInt(req.query.page as string) || 1;
-//   const limit = parseInt(req.query.limit as string) || 20;
-//   const skip = (page - 1) * limit;
+// router.get('/getCards', async(req, res) => {
+//     try{
+//         const response = await Card.find().sort({createdAt: -1}).limit(10);
+//         const resData = res.json(response);
+//         console.log('Fetched cards: ', response)
+//         console.log('resData: ', resData);
 
-//   try {
-//     const cards = await Card.find().skip(skip).limit(limit);
-//     const total = await Card.countDocuments();
+//     }catch(err){
+//         console.error('Something went wrong when fetching cards from database', err)
+//     }
+// })
 
-//     res.json({
-//       data: cards,
-//       hasMore: skip + cards.length < total,
-//       total,
-//     });
-//   } catch (err) {
-//     console.error("Error fetching cards", err);
-//     res.status(500).json({ error: "Failed to fetch cards" });
-//   }
-// });
 
-router.get('/getCards', async(req, res) => {
-    // const page = parseInt(req.query.page as string) || 1;
-    // const limit = parseInt(req.query.limit as string) || 20;
+router.get('/getCards', async (req, res) => {
+    console.log('req: ', req.query)
+    const page = parseInt(req.query.page) || 1;     // Default page = 1
+    const limit = parseInt(req.query.limit) || 10;  // Default limit = 10
     // const skip = (page - 1) * limit;
-    try{
-        const response = await Card.find();
-        const resData = res.json(response);
-        console.log('Fetched cards: ', response)
-        console.log('resData: ', resData);
+    const skip = parseInt(req.query.skip) || 0
+    
+    // console.log('skip: ', skip);
+    // console.log('page: ', page);
+    // console.log('limit: ', limit);
 
-    }catch(err){
-        console.error('Something went wrong when fetching cards from database', err)
+    try {
+        const response = await Card.find()
+            .sort({ publishDate: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.json(response);
+        // console.log(`Fetched cards for page ${page}:`, response);
+    } catch (err) {
+        console.error('Something went wrong when fetching cards from database', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
-})
+});
+
 
 module.exports = router;
