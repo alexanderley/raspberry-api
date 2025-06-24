@@ -2,7 +2,7 @@ const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 
-ffmpeg.setFfmpegPath(ffmpegPath);
+// ffmpeg.setFfmpegPath(ffmpegPath);
 
 const convertToHLS = (inputPath, outputDir, fileName) => {
   return new Promise((resolve, reject) => {

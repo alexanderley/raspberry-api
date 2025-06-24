@@ -18,6 +18,7 @@ const { containerClient } = require("../azure/azure.config");
 const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
 const { convertToHLS } =  require("../controller/ffmpeg.controller");
 
+
 // upload video to blob
 router.post("/upload", async (req, res) => {
   try {
@@ -89,6 +90,7 @@ router.post("/upload", async (req, res) => {
     });
   }
 });
+
 const contentType = mime.lookup('index.m3u8');
 // NEW: Upload HLS folder to Azure Blob
 const uploadHLSFolderToBlob = async (folderPath, blobPrefix) => {
@@ -218,5 +220,6 @@ router.get("/video/:videoId", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 module.exports = router;

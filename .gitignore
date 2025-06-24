@@ -8,3 +8,19 @@ npm-debug.log
 .env
 
 .vscode/
+
+# Video files
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.flv
+*.wmv
+*.webm
+*.m4v
+*.mpg
+*.mpeg
+
+# HLS files
+*.m3u8
+*.ts
