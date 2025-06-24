@@ -18,10 +18,10 @@ const { containerClient } = require("../azure/azure.config");
 const {extractMetadata, uploadToBlob} = require('../controller/blob.controller');
 const { convertToHLS } =  require("../controller/ffmpeg.controller");
 
-
 // upload video to blob
 router.post("/upload", async (req, res) => {
   try {
+    console.log('req body: ', req.body);
     // 1. Extract metadata from headers
     const { fileName, caption, fileType, contentType } = extractMetadata(req.headers);
 

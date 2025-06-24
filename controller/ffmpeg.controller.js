@@ -1,10 +1,5 @@
-// This file contains logic where the video is converted from mp4 and mov to streamable formats like hls. 
-
-// IMPORTANT. Make shure that ffmpeg is installed on machine. Locally and later on the server itself!
-
-const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = require('ffmpeg-static');
 const fs = require('fs');
+const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 
 ffmpeg.setFfmpegPath(ffmpegPath);
