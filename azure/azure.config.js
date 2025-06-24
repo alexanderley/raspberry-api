@@ -22,7 +22,7 @@ async function testConnection(){
 
     // console.log(`blobProps / Account SKU: ${blobProps}`);
     // console.log('Containerclient: ', containerClient);
-    console.log('containerExist: ', containerExists);
+    // console.log('containerExist: ', containerExists);
     return true;
   }catch(err){
     console.log('error: ',err.message)

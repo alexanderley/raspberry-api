@@ -2,37 +2,64 @@ const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 
-const convertToHLS = async (filename, filepath) => {
+ffmpeg.setFfmpegPath(ffmpegPath);
+
+const convertToHLS = (inputPath, outputDir, fileName) => {
   return new Promise((resolve, reject) => {
-    const outputDir = path.join(__dirname, 'hls', filename);
-    const playlistPath = path.join(outputDir, 'playlist.m3u8');
 
-    // Validate input file
-    if (!fs.existsSync(filepath)) {
-      return reject(new Error(`Input file does not exist: ${filepath}`));
-    }
-    // Create output directory if it doesn't exist
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
+    // Create a sub directory
+    const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+    const videoOutputDir = path.join(outputDir, fileNameWithoutExt);
+    
+    // Create the directory (and parent dictories if needed)
+    fs.mkdirSync(videoOutputDir, { recursive: true });
 
-    ffmpeg(filepath)
-      .outputOptions([
-        '-c copy',            // Correct: copy both video and audio streams
-        '-start_number 0',
-        '-hls_time 10',
-        '-hls_list_size 0',
-        '-f hls'
-      ])
-      .output(playlistPath)
-      .on('error', (err) => {
-        reject(new Error(`HLS conversion failed: ${err.message}`));
-      })
-      .on('end', () => {
-        resolve({ playlistPath, outputDir });
-      })
-      .run();
+    // Check if the input file has both video and audio streams
+    ffmpeg.ffprobe(inputPath, (err, metadata) => {
+      if (err) {
+        return reject(err);
+      }
+
+      // Check the number of streams in the input file
+      const hasAudio = metadata.streams.some(stream => stream.codec_type === 'audio');
+
+      const outputOptions = [
+        "-preset veryfast",
+        "-g 48",
+        "-sc_threshold 0",
+        "-map 0:0",
+        "-f hls",
+        "-hls_time 10",
+        "-hls_list_size 0",
+        "-hls_segment_filename", path.join(videoOutputDir, 'segment_%03d.ts')
+      ];
+
+      // If audio stream exists, map the audio stream as well
+      if (hasAudio) {
+        outputOptions.push("-map 0:1");
+      }
+
+      ffmpeg(inputPath)
+        .outputOptions(outputOptions)
+        // Playlist will be saved in the video-specific directory
+        .output(path.join(videoOutputDir, 'index.m3u8'))
+        .on('end', () => {
+          // Return information about the generated files
+          resolve({
+            directory: videoOutputDir,
+            playlistPath: path.join(videoOutputDir, 'index.m3u8'),
+            segments: fs.readdirSync(videoOutputDir)
+                       .filter(f => f.startsWith('segment_') && f.endsWith('.ts'))
+                       .map(f => path.join(videoOutputDir, f))
+          });
+        })
+        .on('error', reject)
+        .run();
+    }
+  );
   });
 };
 
-module.exports = convertToHLS;
+module.exports = {
+   convertToHLS
+};
