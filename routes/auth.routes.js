@@ -12,14 +12,15 @@ const saltRounds = 10;
 
 
 // POST /auth/signup  - Creates a new user in the database
-router.post('/signup', async(req, res, next) => {
-  const { email, password, name } = req.body;
 
-  console.log('req body: ', email, password, name);
+router.post('/signup', async(req, res, next) => {
+  const { email, password, name, username } = req.body;
+
+  console.log('req body: ', email, password, name, username);
 
   // Check if email or password or name are provided as empty string 
-  if (email === '' || password === '' || name === '') {
-    res.status(400).json({ message: "Provide email, password and name" });
+  if (email === '' || password === '' || username === '') {
+    res.status(400).json({ message: "Provide email, password and username" });
     return;
   }
 
@@ -39,47 +40,28 @@ router.post('/signup', async(req, res, next) => {
 
   try {
     const foundUser = await User.findOne({ email });
-  
+    const foundUsername = await User.findOne({username});
     if (foundUser) {
-      res.status(400).json({ message: "User already exists." });
+      res.status(400).json({ message: "Email already used." });
       return;
+    }
+    if(foundUsername){
+      res.status(400).json({message: "Username has already been taken"});
+      return
     }
   
     const salt = bcrypt.genSaltSync(saltRounds);
-    console.log("Salt: ", salt);
     const hashedPassword = bcrypt.hashSync(password, salt);
 
     const verificationToken = jwt.sign({ email }, process.env.TOKEN_SECRET, {
       expiresIn: "1d",
     });
 
-    const createdUser = await User.create({ email, password: hashedPassword, name, verificationToken });
+    const bio = '';
+    const profilePicture = '';
 
-    // ### Nodemailer implementation
-    // password from the email server
-    // const EMAIL_PASSWORD = process.env.EMAIL_SECRET;
+    const createdUser = await User.create({ email, password: hashedPassword, name, username, verificationToken, bio, profilePicture});
 
-    // const transporter = nodemailer.createTransport({
-    //   service: "Gmail",
-    //   auth: {
-    //     user: "alexander.ley.inbox@gmail.com",
-    //     pass: EMAIL_PASSWORD,
-    //   },
-    // });
-
-    // // url that is goin to be send to the user in order to verify their email
-    // const verificationLink = `${frontend_URL}/verify/?token=${verificationToken}`;
-    // const msg = {
-    //   from: '"The Express app 👻" <foo@example.com>',
-    //   to: `${email}`,
-    //   subject: "Account Verification",
-    //   text: `Click the following link to verify your account: ${verificationLink}`,
-    // };
-
-    // await transporter.sendMail(msg);
-  
-    // const { email: createdEmail, name: createdName, _id: createdId } = createdUser;
-    // const user = { email: createdEmail, name: createdName, _id: createdId,};
   
     res.status(201).json({ createdUser });
   } catch (err) {
@@ -106,6 +88,7 @@ router.post('/login', async (req, res, next) => {
       }
       // passwort check
       const passwordCorrect = bcrypt.compareSync(password, foundUser.password);
+      console.log('password correct?: ', passwordCorrect);
       if(passwordCorrect){
          // Deconstruct the user object to omit the password
          const { _id, email, name } = foundUser;
