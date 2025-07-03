@@ -19,6 +19,12 @@ app.use("/api", allRoutes);
 const videoRoutes = require("./routes/video.routes");
 app.use("/api", videoRoutes);
 
+// const postRoutes = require("./routes/post.routes");
+// app.use("/api", postRoutes);
+
+const postRoutes = require("./routes/post.routes");
+app.use("/api", postRoutes);
+
 const infinitRouter = require("./routes/infinite.routes");
 app.use("/api", infinitRouter);
 

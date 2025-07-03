@@ -2,8 +2,6 @@ const express = require("express");
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const User = require("../models/User.model");
-// const nodemailer = require("nodemailer");
-// const frontend_URL = require("../frontendKey");
 
 const { isAuthenticated } = require('./../middleware/jwt.middleware.js');
 
@@ -12,7 +10,6 @@ const saltRounds = 10;
 
 
 // POST /auth/signup  - Creates a new user in the database
-
 router.post('/signup', async(req, res, next) => {
   const { email, password, name, username } = req.body;
 
