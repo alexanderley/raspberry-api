@@ -28,7 +28,7 @@ async function testConnection(){
     console.log('error: ',err.message)
   }
 }
-testConnection();
+// testConnection();
 
 
 module.exports = {
