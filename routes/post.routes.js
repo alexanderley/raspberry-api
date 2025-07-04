@@ -37,9 +37,9 @@ router.get("/getSomeUserPosts", async(req,res)=>{
 
 
     // get all user posts
-router.get('/getUserPosts', async(req, res) => {
-    const {userId} = req.body;
-    
+router.get('/getUserPosts/:userId', async(req, res) => {
+    const {userId} = req.params;
+    console.log('fetch: ', userId)
     try{  
         const postCollection = await PostCollection.findOne({userId}).populate('posts').exec();
         if(!postCollection){
