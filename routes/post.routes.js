@@ -39,15 +39,41 @@ router.get("/getSomeUserPosts", async(req,res)=>{
     // get all user posts
 router.get('/getUserPosts/:userId', async(req, res) => {
     const {userId} = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    console.log('fetch: ', userId, 'page:', page, 'limit:', limit);
     console.log('fetch: ', userId)
+
     try{  
-        const postCollection = await PostCollection.findOne({userId}).populate('posts').exec();
+        const postCollection = await PostCollection.findOne(
+            { userId },
+            {
+                posts:{
+                    $slice: [skip, limit]
+                }
+        }
+        ).populate('posts')
+
+        console.log('postCollection: ', postCollection);
+        
+
         if(!postCollection){
             return res.status(404).json({message: 'No posts found for the user'});
         }
 
-        console.log('postCollection', postCollection.posts);
+        // console.log('postCollection', postCollection.posts);
+
         res.status(200).json(postCollection.posts)
+        //     res.status(200).json({
+        //     posts: postCollection.posts,
+        //     pagination: {
+        //         currentPage: page,
+        //         itemsPerPage: limit,
+        //         totalItems: postCollection.posts.length // or total count if available
+        //     }
+        // });
     }catch(err){
         console.error('Could not fetch user posts');
         res.status(500).json({message: 'Internal Server Error'})
