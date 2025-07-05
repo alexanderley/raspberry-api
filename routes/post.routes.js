@@ -4,7 +4,7 @@ const router = express.Router();
 const Post = require("../models/Post.model");
 const PostCollection = require("../models/PostCollection.model");
 
-
+ // #Todo is completly wrong!!!! fix for fetching more posts
 router.get("/getSomeUserPosts", async(req,res)=>{
     const {userId} = req.body;
 
@@ -40,11 +40,17 @@ router.get("/getSomeUserPosts", async(req,res)=>{
 router.get('/getUserPosts/:userId', async(req, res) => {
     const {userId} = req.params;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = parseInt(req.query.skip) || 0;
 
-    console.log('fetch: ', userId, 'page:', page, 'limit:', limit);
-    console.log('fetch: ', userId)
+    console.log('XXX skip: ', skip);
+    // res.status(200).json({message: skip});
+    // const skip = (page - 1) * limit;
+    // const skip = 10;
+ 
+    // console.log('page: ', page);
+    // console.log('limit: ', limit);
+    // console.log('skip: ', skip);
 
     try{  
         const postCollection = await PostCollection.findOne(
@@ -56,7 +62,7 @@ router.get('/getUserPosts/:userId', async(req, res) => {
         }
         ).populate('posts')
 
-        console.log('postCollection: ', postCollection);
+        // console.log('postCollection: ', postCollection);
         
 
         if(!postCollection){
@@ -66,14 +72,7 @@ router.get('/getUserPosts/:userId', async(req, res) => {
         // console.log('postCollection', postCollection.posts);
 
         res.status(200).json(postCollection.posts)
-        //     res.status(200).json({
-        //     posts: postCollection.posts,
-        //     pagination: {
-        //         currentPage: page,
-        //         itemsPerPage: limit,
-        //         totalItems: postCollection.posts.length // or total count if available
-        //     }
-        // });
+
     }catch(err){
         console.error('Could not fetch user posts');
         res.status(500).json({message: 'Internal Server Error'})

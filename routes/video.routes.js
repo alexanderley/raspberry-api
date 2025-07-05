@@ -8,7 +8,7 @@ const videoFileMap = {
 }
 
 router.get('/streamVideo/:filename', async (req,res) => {
-  console.log('req.params', req.params);
+  // console.log('req.params', req.params);
     try{
     const fileName = req.params.filename;
     const filePath = videoFileMap[fileName];
@@ -20,10 +20,6 @@ router.get('/streamVideo/:filename', async (req,res) => {
     const stat = fs.statSync(filePath);
     const fileSize = stat.size;
     const range = req.headers.range;
-
-    if(stat){
-      console.log('stat', stat);
-    }
 
     if(range){
       const parts = range.replace(/bytes=/, '').split('-');
