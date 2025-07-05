@@ -40,36 +40,31 @@ router.get("/getSomeUserPosts", async(req,res)=>{
 router.get('/getUserPosts/:userId', async(req, res) => {
     const {userId} = req.params;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = parseInt(req.query.skip) || 0;
 
-    console.log('XXX skip: ', skip);
-    // res.status(200).json({message: skip});
-    // const skip = (page - 1) * limit;
-    // const skip = 10;
- 
-    // console.log('page: ', page);
-    // console.log('limit: ', limit);
-    // console.log('skip: ', skip);
-
     try{  
-        const postCollection = await PostCollection.findOne(
-            { userId },
-            {
-                posts:{
-                    $slice: [skip, limit]
-                }
+        // const postCollection = await PostCollection.findOne(
+        //     { userId },
+        //     {
+        //         posts:{
+        //             $slice: [skip, limit]
+        //         }
+        // }
+        // ).populate('posts')
+    const postCollection = await PostCollection.findOne({ userId })
+      .populate({
+        path: 'posts',
+        options: { 
+          sort: { createdAt: -1 }, // Sort ALL posts by date (newest first)
+          skip: skip,             // Then apply pagination
+          limit: limit
         }
-        ).populate('posts')
-
-        // console.log('postCollection: ', postCollection);
-        
+      });
 
         if(!postCollection){
             return res.status(404).json({message: 'No posts found for the user'});
         }
-
-        // console.log('postCollection', postCollection.posts);
 
         res.status(200).json(postCollection.posts)
 
