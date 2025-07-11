@@ -52,7 +52,7 @@ router.get('/getUserPosts/:userId', async(req, res) => {
         //         }
         // }
         // ).populate('posts')
-    const postCollection = await PostCollection.findOne({ userId })
+    const postCollection = await PostCollection.findOne({ userId }) 
       .populate({
         path: 'posts',
         options: { 

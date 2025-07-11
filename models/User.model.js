@@ -9,8 +9,16 @@ const userSchema = new Schema({
   username: {type: String, required: true},
   profilePicture: String,
   bio: String,
-  // followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  // following: [{ type: Schema.Types.ObjectId, ref: "User" }]
+  followers: [{ 
+    type: Schema.Types.ObjectId, 
+    ref: "User",
+    default: [] 
+  }],
+  following: [{ 
+    type: Schema.Types.ObjectId, 
+    ref: "User",
+    default: []
+  }],
   confirmed: {
     type: Boolean,
     default: false,
